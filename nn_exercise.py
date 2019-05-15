@@ -18,6 +18,7 @@ Ask Mike later re: cuda (is_available, etc.)
 import torch
 from torch.autograd import Variable
 import numpy as np
+import pdb
 
 # (i) generate data set
 N = 10000
@@ -41,14 +42,14 @@ class linearRegression(torch.nn.Module):
         return out
 
 inDim, outDim = 1, 1
-lrnRt = 0.01
+lrnRt = 0.1
 
 model = linearRegression(inDim, outDim)
 criterion = torch.nn.MSELoss()
-# what does this \/ do?
 optimizer = torch.optim.SGD(model.parameters(), lr=lrnRt)
 
 # 	(b) train the model
+# 		next step: use batches (define DataSet class, DataLoader)
 
 x_train = x[:T]
 y_train = y[:T]
@@ -56,27 +57,26 @@ y_train = y[:T]
 epochs = 100
 for epoch in range(epochs):
 	# convert to Variable
-	inputs = Variable(torch.from_numpy(x_train))
-	labels = Variable(torch.from_numpy(y_train))
+	inputs = Variable(torch.from_numpy(x_train)).unsqueeze(1)
+	labels = Variable(torch.from_numpy(y_train)).unsqueeze(1)
 
 	# we don't want to accumulate gradient
 	optimizer.zero_grad()
-	print(inputs.size())
 
 	# get ouput
-	output = model(inputs)
+	outputs = model(inputs)
 
 	# get loss
 	loss = criterion(outputs,labels)
-	print(loss)
+
 	# get gradients w.r.t. params
 	loss.backward()
 
 	# update params
 	optimizer.step()
 
-#	(c) evaluate
-"""
+#	(c) evaluate after each epoch
+
 x_eval = x[T:]
 y_eval = y[T:]
 
@@ -91,6 +91,6 @@ with torch.no_grad():
 	plt.plot(x_eval, predicted, '--', label='Predictions', alpha=.5)
 	plt.legend(loc = 'best')
 	plt.show()
-"""
 
 # (iii) Add more layers and some nonlinearities
+#		relu, sigmoid, data loaders/data sets
